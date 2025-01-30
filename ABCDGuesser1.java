@@ -14,17 +14,14 @@ import components.utilities.FormatChecker;
  * @author Ardi Ahmed
  *
  */
-public final class ABCDGuesser1 {
+public final class ABCDGuesser2 {
 
     /**
      * No argument constructor--private to prevent instantiation.
      */
-    private ABCDGuesser1() {
+    private ABCDGuesser2() {
     }
 
-    /**
-     * Put a short phrase describing the static method myMethod here.
-     */
     /**
      * Repeatedly asks the user for a positive real number until the user enters
      * one. Returns the positive real number.
@@ -41,16 +38,18 @@ public final class ABCDGuesser1 {
         double mu = 0;
         String muString = "";
 
-        // essentially stating, keep running until the value of validInput has changed
+        // essentially stating, keep running until the value of
+        // validInput has changed
         while (!validInput) {
             // prompt user to input a real number and capture it as a string
             out.println("Enter a positive real number (mu): ");
             muString = in.nextLine();
-            // if the string turns out to be parsable as a Double
+            // if the string turns out to be parse-able as a Double
             if (FormatChecker.canParseDouble(muString)) {
                 // if the parsed Double is positive
                 if (Double.parseDouble(muString) > 0) {
-                    // assign the parsed Double to mu and change state of validInput
+                    // assign the parsed Double to mu and change state of
+                    // validInput
                     mu = Double.parseDouble(muString);
                     validInput = true;
                 } else {
@@ -89,7 +88,7 @@ public final class ABCDGuesser1 {
                 // check if the string is != 1 and is positive
                 if (Double.parseDouble(inputString) != 1.0
                         && Double.parseDouble(inputString) > 0) {
-                    // if it is, assign the string's value to input
+                    // if valid, assign the string's value to input
                     // and change the value of validInput
                     input = Double.parseDouble(inputString);
                     validInput = true;
@@ -106,88 +105,152 @@ public final class ABCDGuesser1 {
     }
 
     /**
+     * Method which outputs the best exponents, best result, and smallest error
+     * (as strings) given the user's first 4 original inputs.
+     *
+     * @param in
+     *            the input stream
+     *
+     * @param out
+     *            the output stream
+     *
+     * @param mu
+     *            user's inputed target number
+     *
+     * @param userValues
+     *            user's inputed doubles stored in a double[] array. indexes 0-3
+     *            represent w, x, y, z respectively
+     *
+     * @param bestExponentValues
+     *            the exponents calculated stored in a double[] array, for which
+     *            raising each w, x, y, z to will produce the best and closest
+     *            result
+     *
+     * @param smallestError
+     *            best (as in smallest) error calculated due to raising w,x,y,z
+     *            to aBest,bBest,cBest,dBest
+     *
+     * @param bestResult
+     *            the most accurate value calculated due to raising w,x,y,z to
+     *            aBest,bBest,cBest,dBest
+     *
+     */
+
+    private static void performOutput(SimpleReader in, SimpleWriter out, double mu,
+            double[] userValues, double[] bestExponentValues, double smallestError,
+            double bestResult) {
+
+        // initialize number variables to avoid magic number warning
+        final double hundred = 100;
+        final int one = 1;
+        final int two = 2;
+        final int three = 3;
+
+        final double smallestPercent = smallestError * hundred;
+
+        // output results
+        out.println("\n\nYou entered a target number: " + mu);
+        out.println("You entered the 4 numbers: " + userValues[0] + ", " + userValues[one]
+                + ", " + userValues[two] + ", " + userValues[three]);
+        out.println("With the exponents (respectively): " + bestExponentValues[0] + ", "
+                + bestExponentValues[one] + ", " + bestExponentValues[two] + ", "
+                + bestExponentValues[three]);
+        out.println("The closest match was: " + bestResult);
+        out.print("With a percent of error: ");
+        // OSU provided documentation to trim doubles to a set number decimal places
+        out.print(smallestPercent, 2, false);
+        out.print("%");
+    }
+
+    /**
      * Main method.
      *
      * @param args
      *            the command line arguments
      */
     public static void main(String[] args) {
+        // initialize input and output stream
         SimpleReader in = new SimpleReader1L();
         SimpleWriter out = new SimpleWriter1L();
 
-        // collect user inputs
+        // declare numbers here to avoid magic number warning
+        final double hundred = 100;
+        final int one = 1;
+        final int two = 2;
+        final int three = 3;
+        final int four = 4;
+
+        // initialize double arrays for both user inputs and best exponents
+        double[] userValues = new double[four];
+        double[] bestExponentValues = new double[four];
+
+        // collect user inputs and store in userValues array
         double mu = getPositiveDouble(in, out);
         double w = getPositiveDoubleNotOne(in, out);
+        userValues[0] = w;
         double x = getPositiveDoubleNotOne(in, out);
+        userValues[one] = x;
         double y = getPositiveDoubleNotOne(in, out);
+        userValues[two] = y;
         double z = getPositiveDoubleNotOne(in, out);
-        // test: out.println(mu + " " + w + " " + x + " " + y + " " + z);
+        userValues[three] = z;
 
         // establish exponentsList
         final double[] exponentsList = { -5, -4, -3, -2, -1, -1 / 2, -1 / 3, -1 / 4, 0,
                 1 / 4, 1 / 3, 1 / 2, 1, 2, 3, 4, 5 };
 
-        // initialize variables outside of loop
+        // initialize variables outside of loop (avoiding magic number warning)
         final double acceptableError = 0.01;
-        final double hundred = 100;
         double smallestError = hundred;
         double result = 0;
         double bestResult = 0;
         double relativeError = 0;
-        double aBest = 0;
-        double bBest = 0;
-        double cBest = 0;
-        double dBest = 0;
 
         // nested while loops to calculate every possible combination of exponents
-        int i = 0; // index for a
-        while (i < exponentsList.length) {
-            int j = 0; // index for b
-            while (j < exponentsList.length) {
-                int k = 0; // index for c
-                while (k < exponentsList.length) {
-                    int l = 0; // index for d
-                    while (l < exponentsList.length) {
+        for (int i = 0; i < exponentsList.length; i++) {
+            for (int j = 0; j < exponentsList.length; j++) {
+                for (int k = 0; k < exponentsList.length; k++) {
+                    for (int l = 0; l < exponentsList.length; l++) {
                         // assign exponents
                         double a = exponentsList[i];
                         double b = exponentsList[j];
                         double c = exponentsList[k];
                         double d = exponentsList[l];
 
-                        // calculate result
+                        // calculate result by raising each w, x, y, z to
+                        // a, b, c, d respectively
                         result = Math.pow(w, a) * Math.pow(x, b) * Math.pow(y, c)
                                 * Math.pow(z, d);
 
-                        // check relative error
+                        // calculate relative (current) error
                         relativeError = Math.abs(result - mu) / mu;
-                        // if error is acceptable =>
-                        // save bestResult, smallestError, and the best exponents
+
+                        // if relative error falls within acceptableError range
                         if (relativeError <= acceptableError) {
+                            // if relative error is less than current smallestError
                             if (relativeError < smallestError) {
+                                // save current values of error and result in
+                                // smallestError and bestResult
                                 smallestError = relativeError;
                                 bestResult = result;
-                                aBest = a;
-                                bBest = b;
-                                cBest = c;
-                                dBest = d;
+                                // store exponents in bestExponentValues[] array
+                                bestExponentValues[0] = a;
+                                bestExponentValues[one] = b;
+                                bestExponentValues[two] = c;
+                                bestExponentValues[three] = d;
                             }
                         }
-                        l++;
+
                     }
-                    k++;
                 }
-                j++;
             }
-            i++;
         }
 
-        // output results
-        out.println("\n\nYou entered a target number: " + mu);
-        out.println("You entered the 4 numbers: " + w + ", " + x + ", " + y + ", " + z);
-        out.println("With the exponents (respectively): " + aBest + ", " + bBest + ", "
-                + cBest + ", " + dBest);
-        out.println("The closest match was: " + bestResult);
-        out.println("With a percent of error: " + smallestError * hundred + "%");
+        // call performOutput method and pass through mu, list of userValues,
+        // list of bestExponentValues, smallestError and bestResult
+
+        performOutput(in, out, mu, userValues, bestExponentValues, smallestError,
+                bestResult);
 
         /*
          * Close input and output streams
